@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlas Medical 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">Atlas<em>3D</em></span>
+    </div>
+    <div class="header-info">
+      <span id="loadingStatus">⏳ Se încarcă modelul...</span>
+    </div>
+    <div class="search-wrap">
+      <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/></svg>
+      <input id="searchInput" type="text" placeholder="Caută structuri anatomice…" autocomplete="off" />
+      <div id="searchResults" class="search-dropdown hidden"></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="toolbar">
+  <button class="tool-btn" id="toggleRotate" title="Rotire automată">
+    <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 10 10"/><polyline points="16 2 22 2 22 8"/></svg>
+  </button>
+  <button class="tool-btn" id="toggleTransparency" title="Transparență">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20" stroke-dasharray="3 2"/></svg>
+  </button>
+  <button class="tool-btn" id="toggleLabels" title="Etichete">
+    <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="10" rx="2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>
+  </button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" id="resetView" title="Reset vizualizare">
+    <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+  </button>
+  <button class="tool-btn" onclick="window.resetHidden?.()" title="Arată toate structurile ascunse">
+    <svg viewBox="0 0 24 24"><path d="M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5z"/><circle cx="12" cy="12" r="3"/></svg>
+  </button>
+
+  <!-- Container pentru dropdown-ul de grup -->
+  <div class="group-dropdown-container" id="groupDropdownContainer">
+    <button class="tool-btn" id="btnRespiratory" title="Sistemul Respirator">🫁</button>
+    <div id="groupPanel" class="group-dropdown-panel hidden">
+      <div class="group-dropdown-header">
+        <span id="groupTitle">Sistem</span>
+      </div>
+      <div id="groupLayers" class="group-dropdown-layers">
+        <!-- checkbox-urile vor fi injectate aici -->
+      </div>
+      <button id="groupReset" class="group-dropdown-reset">Ieși din grup</button>
+    </div>
+  </div>
+</aside>
+
+      <!-- 🆕 PANOUL PENTRU GRUPURI ANATOMICE -->
+      <div id="groupPanel" class="group-panel hidden">
+        <div class="group-panel-header">
+          <span id="groupTitle">Grup anatomic</span>
+        </div>
+        <div id="groupLayers" class="group-layers">
+          <!-- Se populează dinamic -->
+        </div>
+        <button id="groupReset" class="group-reset-btn">← Acasa</button>
+      </div>
+    </aside>
+
+    <section class="viewport" id="viewport">
+      <canvas id="canvas3d"></canvas>
+      <div class="viewport-hint" id="viewportHint">
+        <span>🖱 Trage pentru rotire · Scroll pentru zoom · Click pe structuri · Alt+Click pentru a ascunde</span>
+      </div>
+      <div class="hover-label" id="hoverLabel"></div>
+      <div class="test-controls"></div>
+    </section>
+
+    <aside class="info-panel" id="infoPanel">
+      <!-- structura panoului informativ rămâne neschimbată -->
+      <div class="panel-placeholder" id="panelPlaceholder">
+        <div class="placeholder-icon">⬡</div>
+        <p>Selectează o structură<br/>din model pentru detalii</p>
+      </div>
+      <div class="panel-content hidden" id="panelContent">
+        <div class="panel-system-badge" id="panelBadge"></div>
+        <h2 class="panel-name" id="panelName"></h2>
+        <p class="panel-latin" id="panelLatin"></p>
+        <div class="panel-section">
+          <h3>Descriere</h3>
+          <p id="panelDesc"></p>
+        </div>
+        <div class="panel-section">
+          <h3>Funcție principală</h3>
+          <p id="panelFunc"></p>
+        </div>
+        <div class="panel-section">
+          <h3>Sistem</h3>
+          <div class="panel-tags" id="panelTags"></div>
+        </div>
+        <div class="panel-section" id="panelFactsWrap">
+          <h3>Date rapide</h3>
+          <ul class="panel-facts" id="panelFacts"></ul>
+        </div>
+        <button class="btn-highlight" id="btnHighlight">
+          <span class="btn-dot"></span> Evidențiază structura
+        </button>
+        <button class="btn-highlight" id="btnDescription" style="margin-top:8px;">
+          <span class="btn-dot"></span> Descriere detaliată
+        </button>
+        <div class="view-directions">
+          <button class="dir-btn" data-dir="front" title="Vedere din față">⬆️ Față</button>
+          <button class="dir-btn" data-dir="back" title="Vedere din spate">⬇️ Spate</button>
+          <button class="dir-btn" data-dir="left" title="Vedere din stânga">⬅️ Stânga</button>
+          <button class="dir-btn" data-dir="right" title="Vedere din dreapta">➡️ Dreapta</button>
+        </div>
+      </div>
+
+      <div class="hidden-panel" id="hiddenPanel">
+        <div class="hidden-panel-header">
+          <h3>🫥 Structuri ascunse (<span id="hiddenCount">0</span>)</h3>
+          <button class="hidden-reset-all" onclick="window.resetHidden?.()">Arată toate</button>
+        </div>
+        <ul class="hidden-list" id="hiddenItems">
+          <li class="hidden-list-empty">Nicio structură ascunsă</li>
+        </ul>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="statusbar">
+    <span id="statusStructures">— structuri</span>
+    <span id="statusSelected">Nimic selectat</span>
+    <span id="statusSystem">Sistem: Toate</span>
+  </footer>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.161.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.161.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>

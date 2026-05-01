@@ -1,0 +1,61 @@
+{
+  "systems": {
+    "skeletal": {
+      "name": "Schelet",
+      "color": "#e8d5b7",
+      "visibleByDefault": false
+    },
+    "muscular": {
+      "name": "Mușchi",
+      "color": "#c0392b",
+      "visibleByDefault": false
+    },
+    "nervous": {
+      "name": "Nervos",
+      "color": "#f1c40f",
+      "visibleByDefault": false
+    },
+    "arterial": {
+      "name": "Arterial",
+      "color": "#e74c3c",
+      "visibleByDefault": false
+    },
+    "venous": {
+      "name": "Venos",
+      "color": "#2980b9",
+      "visibleByDefault": false
+    },
+    "visceral": {
+      "name": "Organe",
+      "color": "#d35400",
+      "visibleByDefault": false
+    },
+    "joints": {
+      "name": "Articulații",
+      "color": "#bdc3c7",
+      "visibleByDefault": false
+    },
+    "other": {
+      "name": "Altele",
+      "color": "#95a5a6",
+      "visibleByDefault": false
+    },
+    "integumentary": {
+      "name": "Piele",
+      "color": "#f5c6a0",
+      "visibleByDefault": false
+    }
+  },
+  "model": {
+    "path": "./models/Startup.glb",
+    "scale": 1.0,
+    "center": true
+  },
+  "materialProperties": {
+    "roughness": 0.65,
+    "metalness": 0.05,
+    "emissiveIntensity": 0.0,
+    "transparent": false,
+    "opacity": 1.0
+  }
+}
